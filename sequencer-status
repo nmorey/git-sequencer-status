@@ -169,9 +169,27 @@ __am_apply_sequence()
 }
 
 if [ "$LESS" == "" ]; then
-	export LESS=FRX
+	export LESS="FRX"
 fi
-PAGER=$(if [ "$GIT_PAGER" != "" ]; then echo $GIT_PAGER; else git config core.pager || echo "cat"; fi)
+if [ "$LV" == "" ]; then
+	export LV="-c"
+fi
+
+if [ "$GIT_PAGER" != "" ]; then
+	PAGER=$GIT_PAGER
+else
+	GIT_CONFIG_PAGER=$(git config core.pager)
+	if [ $? -eq 0 ]; then
+		PAGER=$GIT_CONFIG_PAGER
+	else
+		if [ "$PAGER" == "" ]; then
+			PAGER="less"
+		else
+			# Keep pager at its current value
+			true
+		fi
+	fi
+fi
 
 (if [ -f ${GIT_DIR}/CHERRY_PICK_HEAD ]; then
 	__simple_sequence "Cherry picking"
