@@ -1,0 +1,188 @@
+#!/bin/bash
+
+export GIT_DIR=$(git rev-parse --git-dir)
+
+__colorize_todo()
+{
+	awk  -vC0='\033[00;33m' -vC1='\033[00;31m' -vC2='\033[00m' '{printf( C0 "%-7s " C1 $2 " " C2, $1); for (i = 3; i <= NF; i++) { printf("%s ", $i);}; printf("\n");}'
+}
+
+__git_log_todo()
+{
+	git --no-pager log --format='%C(yellow nodim)pick    %C(red nodim)%h %C(white)%s' $*
+}
+__colorize_current()
+{
+	awk  -vC0='\033[01;36m' -vC1='\033[00;31m' -vC2='\033[00m' '{printf( C0 "%-7s " C1 $2 " " C2, $1); for (i = 3; i <= NF; i++) { printf("%s ", $i);}; printf("\n");}'
+}
+__git_log_current_unmerged()
+{
+	git --no-pager log --format='%C(cyan bold)*pick   %C(red nodim)%h %C(white)%s'  $*
+}
+__git_log_current()
+{
+	git --no-pager log --format='%C(cyan bold)pick    %C(red nodim)%h %C(white)%s' $*
+}
+
+__colorize_done()
+{
+	awk  -vC0='\033[02;31m' -vC1='\033[00;31m' -vC2='\033[00m' '{printf( C0 "%-7s " C1 $2 " " C2, $1); for (i = 3; i <= NF; i++) { printf("%s ", $i);}; printf("\n");}'
+}
+__git_log_done()
+{
+	git --no-pager log --format='%C(red dim)done    %C(red nodim)%h %C(white)%s' $*
+}
+
+__git_log_onto()
+{
+	git --no-pager log -n 1 --format='%C(red dim)onto    %C(red nodim)%h %C(white)%s' $*
+
+}
+__has_unmerged()
+{
+	git ls-files --unmerged | wc -l
+}
+
+__sha1_to_refname()
+{
+	local ONTO=$1
+
+	if [ $# -gt 1 ]; then
+		git name-rev --name-only --no-undefined ${ONTO} --refs $2 2> /dev/null
+		if [ $? -eq 0 ]; then
+			return
+		fi
+	fi
+	git name-rev --name-only --no-undefined ${ONTO} --refs refs/heads/*
+}
+
+__sanitize_todo()
+{
+	while read line; do
+		ACTION=$(echo $line | awk '{ print $1}')
+		SHA1=$(echo $line | awk '{ print $2}')
+		SUBJECT=$(echo $line | awk '{ for (i = 3; i <= NF; i++) { printf("%s ", $i);}; printf("\n");}')
+
+		SHORT_SHA1=$(git log -n 1 ${SHA1} --format='%h')
+		echo "${ACTION} ${SHORT_SHA1} ${SUBJECT}"
+	done
+}
+__simple_sequence()
+{
+	local BASE=$(cat ${GIT_DIR}/sequencer/head)
+	local BASE_NICE=$(__sha1_to_refname ${BASE})
+	local N_LINES=$(wc -l ${GIT_DIR}/sequencer/todo | awk '{ print $1}')
+	echo "# " $*
+
+	head -n $(( $N_LINES - 1 )) ${GIT_DIR}/sequencer/todo | __sanitize_todo | __colorize_todo
+
+	if [ $(__has_unmerged) != "0" ]; then
+		(echo -n '*'; tail -n 1 ${GIT_DIR}/sequencer/todo) | __sanitize_todo | __colorize_current
+	else
+		tail -n 1 ${GIT_DIR}/sequencer/todo | __sanitize_todo | __colorize_current
+	fi
+
+	__git_log_done HEAD ^${BASE}
+	__git_log_onto ${BASE}
+}
+
+__rebase_merge_sequence()
+{
+	local BASE=$(cat ${GIT_DIR}/rebase-merge/head-name)
+	local ONTO=$(cat ${GIT_DIR}/rebase-merge/onto)
+	local BASE_NICE=$(echo ${BASE} | sed -e 'sL^refs/heads/LL')
+	local ONTO_NICE=$(__sha1_to_refname ${ONTO} ${BASE})
+	local CURRENT=$(tail -n 1 ${GIT_DIR}/rebase-merge/done)
+
+	echo "# Interactive rebase: ${BASE_NICE} onto ${ONTO_NICE}"
+	tac ${GIT_DIR}/rebase-merge/git-rebase-todo | egrep -v '^#' | \
+		egrep -v '^$' | __sanitize_todo |__colorize_todo
+
+	if [ $(__has_unmerged) != "0" ]; then
+		echo "*$CURRENT" |  __sanitize_todo | __colorize_current
+	else
+		echo $CURRENT | __sanitize_todo |  __colorize_current
+	fi
+
+	tac ${GIT_DIR}/rebase-merge/done | tail -n +2 | __sanitize_todo | __colorize_done
+	__git_log_onto ${ONTO}
+}
+
+__rebase_apply_sequence()
+{
+	local BASE=$(cat ${GIT_DIR}/rebase-apply/head-name)
+	local ONTO=$(cat ${GIT_DIR}/rebase-apply/onto)
+	local BASE_NICE=$(echo ${BASE} | sed -e 'sL^refs/heads/LL')
+	local ONTO_NICE=$(__sha1_to_refname ${ONTO} ${BASE})
+	local UNAPPLIED=1
+	local NEXT=$(cat ${GIT_DIR}/rebase-apply/next)
+
+	echo "# Non-interactive rebase: ${BASE_NICE} onto ${ONTO_NICE}"
+
+	for FILE in $(ls -r ${GIT_DIR}/rebase-apply/[0-9]*); do
+		local NUM=$(basename $FILE | sed -e 's/^0*//')
+		local SHA1=$(head -n 1 $FILE  | awk '{ print $2 }')
+
+		if [ "$NUM"  == "$NEXT" ]; then
+			UNAPPLIED=0
+			if [ $(__has_unmerged) != "0" ]; then
+				__git_log_current_unmerged -n 1 ${SHA1}
+			else
+				__git_log_current -n 1  ${SHA1}
+			fi
+		elif [ $UNAPPLIED -eq 0 ]; then
+			__git_log_done -n 1 ${SHA1}
+		else
+			__git_log_todo -n 1 ${SHA1}
+		fi
+	done
+	__git_log_onto $(cat ${GIT_DIR}/rebase-apply/abort-safety)
+}
+__am_apply_sequence()
+{
+	local BASE=$(cat ${GIT_DIR}/rebase-apply/abort-safety)
+	local UNAPPLIED=1
+	local NEXT=$(cat ${GIT_DIR}/rebase-apply/next)
+
+	echo "# Applying patches"
+
+	for FILE in $(ls -r ${GIT_DIR}/rebase-apply/[0-9]*); do
+		local PATCH_ID=$(basename $FILE)
+		local NUM=$(echo $PATCH_ID | sed -e 's/^0*//')
+		local SUBJECT=$(egrep '^Subject:' $FILE | head -n 1 |\
+					sed -e 's/Subject:[[:space:]]*\(\[[^]]*\][[:space:]]*\)*//')
+
+		if [ "$NUM"  == "$NEXT" ]; then
+			UNAPPLIED=0
+			if [ $(__has_unmerged) != "0" ]; then
+				echo "pick ${PATCH_ID} ${SUBJECT}" | __colorize_current
+			else
+				echo "done ${PATCH_ID} ${SUBJECT}" | __colorize_current
+			fi
+		elif [ $UNAPPLIED -eq 0 ]; then
+			echo "done ${PATCH_ID} ${SUBJECT}" | __colorize_done
+		else
+			echo "pick ${PATCH_ID} ${SUBJECT}" | __colorize_todo
+		fi
+	done
+	__git_log_onto ${BASE}
+}
+
+if [ "$LESS" == "" ]; then
+	export LESS=FRX
+fi
+PAGER=$(if [ "$GIT_PAGER" != "" ]; then echo $GIT_PAGER; else git config core.pager || echo "cat"; fi)
+
+(if [ -f ${GIT_DIR}/CHERRY_PICK_HEAD ]; then
+	__simple_sequence "Cherry picking"
+elif [ -d ${GIT_DIR}/rebase-merge ]; then
+	__rebase_merge_sequence
+elif  [ -d ${GIT_DIR}/rebase-apply ]; then
+	if [ -f ${GIT_DIR}/rebase-apply/applying ]; then
+		__am_apply_sequence
+	else
+		__rebase_apply_sequence
+	fi
+elif [ -f ${GIT_DIR}/REVERT_HEAD ]; then
+	__simple_sequence "Reverting"
+fi) | ${PAGER}
