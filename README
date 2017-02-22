@@ -1,0 +1,12 @@
+sequencer status is a Bash script to display the sequencer status.
+
+Several git commands (rebase, cherry-pick, am, revert) use the git sequencer
+ when a list actions needs to be executed.
+Althouth all the information is available in the git directory, it can be sometimes quite hard
+ to find out where you are within your rebase.
+
+This script pritns a status of what was done and what is left to do.
+
+It is largely inspired by what Magit prints in it status screen.
+
+To use it, simply run sequencer-status within your git repository.
