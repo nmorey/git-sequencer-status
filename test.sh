@@ -21,6 +21,7 @@ cd $TMPDIR || exit 1
 	git commit -m "First commit"
 	git branch rebase_conflict
 	git branch cherry_pick
+	git branch empty_cp
 	echo 2 >> file
 	git commit -a -m "Second commit"
 	echo 3 >> file
@@ -37,9 +38,17 @@ cd $TMPDIR || exit 1
 	echo 1 > file2
 	git add file2
 	git commit -a -m "Alternate history"
+
+	git checkout empty_cp
+	echo 2 >> file
+	echo 1 > file2
+	git add file file2
+	git commit -a -m "Redundant second commit"
+
 ) > /dev/null
 
 echo "Checking cherry pick support"
+git checkout cherry_pick
 git cherry-pick master~2 master master~1 > /dev/null 2>&1
 LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 REF_LOG=$(cat <<EOF | __sanitize_log
@@ -80,6 +89,7 @@ fi
 git revert --abort
 
 echo "Checking non interactive rebase support"
+git checkout revert
 git rebase rebase_conflict > /dev/null 2>&1
 LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 REF_LOG=$(cat <<EOF | __sanitize_log
@@ -98,9 +108,9 @@ if [ $? -ne 0 ]; then
 fi
 git rebase --abort
 
+echo "Checking am support"
 git checkout rebase_conflict
 git format-patch master~2..master --stdout > patches.mailbox
-echo "Checking am support"
 git am patches.mailbox  > /dev/null 2>&1
 LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 REF_LOG=$(cat <<EOF | __sanitize_log
@@ -119,4 +129,26 @@ fi
 git am --abort
 
 
+echo "Checking rebase with empty commit support"
+git checkout master
+GIT_EDITOR=true git rebase -i empty_cp  > /dev/null 2>&1
+LOG=$($SEQDIR/sequencer-status | __sanitize_log)
+REF_LOG=$(cat <<EOF | __sanitize_log
+# Interactive rebase: master onto empty_cp
+pick    d4e101f Fourth commit 
+pick    b636e21 Third commit 
+pick    f4f895f Second commit 
+onto    211640b Redundant second commit
+EOF
+)
+
+diff  <(echo "$LOG")  <(echo "$REF_LOG")
+if [ $? -ne 0 ]; then
+	echo "Failure in AM mode" >&2
+	exit 1
+fi
+git rebase --abort
+
+
+# Post cleanup
 rm -Rf $TMPDIR
