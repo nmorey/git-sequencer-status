@@ -59,9 +59,9 @@ __sha1_to_refname()
 __sanitize_todo()
 {
 	while read line; do
-		ACTION=$(echo $line | awk '{ print $1}')
-		SHA1=$(echo $line | awk '{ print $2}')
-		SUBJECT=$(echo $line | awk '{ for (i = 3; i <= NF; i++) { printf("%s ", $i);}; printf("\n");}')
+		ACTION=$(echo "$line" | awk '{ print $1}')
+		SHA1=$(echo "$line" | awk '{ print $2}')
+		SUBJECT=$(echo "$line" | awk '{ for (i = 3; i <= NF; i++) { printf("%s ", $i);}; printf("\n");}')
 
 		SHORT_SHA1=$(git log -n 1 ${SHA1} --format='%h')
 		echo "${ACTION} ${SHORT_SHA1} ${SUBJECT}"
@@ -101,7 +101,7 @@ __rebase_merge_sequence()
 	if [ $(__has_unmerged) != "0" ]; then
 		echo "*$CURRENT" |  __sanitize_todo | __colorize_current
 	else
-		echo $CURRENT | __sanitize_todo |  __colorize_current
+		echo "$CURRENT" | __sanitize_todo |  __colorize_current
 	fi
 
 	tac ${GIT_DIR}/rebase-merge/done | tail -n +2 | __sanitize_todo | __colorize_done
