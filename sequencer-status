@@ -191,10 +191,11 @@ else
 	fi
 fi
 
-(if [ -f ${GIT_DIR}/CHERRY_PICK_HEAD ]; then
-	__simple_sequence "Cherry picking"
-elif [ -d ${GIT_DIR}/rebase-merge ]; then
+(
+if [ -d ${GIT_DIR}/rebase-merge ]; then
 	__rebase_merge_sequence
+elif [ -f ${GIT_DIR}/CHERRY_PICK_HEAD ]; then
+	__simple_sequence "Cherry picking"
 elif  [ -d ${GIT_DIR}/rebase-apply ]; then
 	if [ -f ${GIT_DIR}/rebase-apply/applying ]; then
 		__am_apply_sequence
