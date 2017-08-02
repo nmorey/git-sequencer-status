@@ -2,7 +2,42 @@
 
 export GIT_DIR=$(git rev-parse --git-dir)
 
+USE_COLOR=0
 if [ -t 1 ]; then
+	USE_COLOR=1
+fi
+
+usage()
+{
+	local errCode=$1
+	echo -e "Usage: $(basename $0) [OPTS]"
+	echo -e "\t--[no-]color     Force color to be enabled/disabled"
+	echo -e "\t-h,--help        Diplay usage"
+	exit $errCode
+}
+
+
+while [ $# -gt 0 ]; do
+	ARG=$1
+	shift
+	case "$ARG" in
+		--color)
+			USE_COLOR=1
+			;;
+		--no-color)
+			USE_COLOR=0
+			;;
+		-h|--help)
+			usage 0
+			;;
+		*)
+			echo "ERROR: Invalid option $ARG" >&2
+			usage 1
+			;;
+	esac
+done
+
+if [ $USE_COLOR -eq 1 ]; then
 	export YELLOW_NODIM='\033[00;33m'
 	export RED_NODIM='\033[00;31m'
 	export RED_DIM='\033[02;31m'
