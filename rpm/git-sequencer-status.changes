@@ -1,4 +1,13 @@
 -------------------------------------------------------------------
+Wed Aug  2 14:10:32 UTC 2017 - nmoreychaisemartin@suse.com
+
+- Version 1.1
+  * RPM packaging
+  * Man page
+  * Add --[no]-color option
+  * Add --help and --version options
+
+-------------------------------------------------------------------
 Wed Aug  2 12:31:13 UTC 2017 - nmoreychaisemartin@suse.com
 
 - Initial RPM packaging

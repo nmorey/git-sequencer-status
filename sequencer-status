@@ -1,6 +1,7 @@
 #!/bin/bash
 
 export GIT_DIR=$(git rev-parse --git-dir)
+export SEQUENCER_VERSION=1.1
 
 USE_COLOR=0
 if [ -t 1 ]; then
@@ -12,6 +13,7 @@ usage()
 	local errCode=$1
 	echo -e "Usage: $(basename $0) [OPTS]"
 	echo -e "\t--[no-]color     Force color to be enabled/disabled"
+	echo -e "\t-v,--version     Diplay version information"
 	echo -e "\t-h,--help        Diplay usage"
 	exit $errCode
 }
@@ -26,6 +28,10 @@ while [ $# -gt 0 ]; do
 			;;
 		--no-color)
 			USE_COLOR=0
+			;;
+		-v|--version)
+			echo "git-sequencer-status $SEQUENCER_VERSION"
+			exit 0
 			;;
 		-h|--help)
 			usage 0
