@@ -128,6 +128,25 @@ if [ $? -ne 0 ]; then
 fi
 git am --abort
 
+echo "Checking rebase with conflict support"
+git checkout master
+GIT_EDITOR=true git rebase -i rebase_conflict  > /dev/null 2>&1
+LOG=$($SEQDIR/sequencer-status | __sanitize_log)
+REF_LOG=$(cat <<EOF | __sanitize_log
+# Interactive rebase: master onto rebase_conflict
+pick    6570375 Fourth commit 
+pick    382e384 Third commit 
+*pick   5e8c91b Second commit 
+onto    5c32ab9 Alternate second
+EOF
+)
+
+diff  <(echo "$LOG")  <(echo "$REF_LOG")
+if [ $? -ne 0 ]; then
+	echo "Failure in interactive rebase with conflict mode" >&2
+	exit 1
+fi
+git rebase --abort
 
 echo "Checking rebase with empty commit support"
 git checkout master
