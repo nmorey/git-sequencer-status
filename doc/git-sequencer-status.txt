@@ -29,6 +29,9 @@ OPTIONS
 --[no]-color::
 		Force coloring to be on/off whether the command is run in a TTY or not
 
+--version::
+		Display version information
+
 --help::
 		Display usage
 
