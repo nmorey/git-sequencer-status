@@ -11,7 +11,7 @@ export TMPDIR=$(mktemp -d)
 # Drop colors and SHA as they change from one run to another
 __sanitize_log()
 {
-	sed -r -e "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" -e 's/^([a-zA-Z\*]* +)[a-f0-9]+ /\1 /g'
+	sed -r  -e 's/^([a-zA-Z\*]* +)[a-f0-9]+ /\1 /g'
 }
 
 echo $TMPDIR
@@ -273,6 +273,31 @@ EOF
 	git rebase --abort
 }
 
+
+test_color()
+{
+	goto_repo
+	echo "Checking coloring support"
+	git checkout revert
+	git rebase rebase_conflict > /dev/null 2>&1
+	LOG=$($SEQDIR/sequencer-status --color | __sanitize_log)
+	REF_LOG=$(cat <<EOF | __sanitize_log
+# Non-interactive rebase: revert onto rebase_conflict
+pick    38fb428 Fourth commit
+pick    46c2f5e Third commit
+*pick   22bc518 Second commit
+onto    68cb488 Alternate second
+EOF
+		   )
+
+	diff  <(echo "$LOG")  <(echo "$REF_LOG")
+	if [ $? -eq 0 ]; then
+		echo "Failure in color mode" >&2
+		exit 1
+	fi
+	git rebase --abort
+}
+
 juLog_fatal setup_repo
 
 juLog test_cherry_pick
@@ -280,6 +305,7 @@ juLog test_revert
 juLog test_rebase
 juLog test_am
 juLog test_rebase_interative
+juLog test_color
 
 
 # Post cleanup

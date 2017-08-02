@@ -25,11 +25,11 @@ License:        GPL-3.0
 Group:          Development/Tools/Version
 Url:            https://github.com/nmorey/git-sequencer-status
 Source:         %{name}-%{version}%{git_ver}.tar.bz2
-BuildRequires:  git
+BuildRequires:  git-core >= 2.0
 BuildRequires:  bc
 BuildRequires:  asciidoc
 BuildRequires:  xmlto
-Requires:       git
+Requires:       git-core >= 2.0
 BuildArch:      noarch
 
 %description

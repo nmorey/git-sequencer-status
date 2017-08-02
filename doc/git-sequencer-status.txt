@@ -23,6 +23,15 @@ state in a human readable format.
 
 This is largely inspired by the way Magit prints its status screen.
 
+OPTIONS
+-------
+
+--[no]-color::
+		Force coloring to be on/off whether the command is run in a TTY or not
+
+--help::
+		Display usage
+
 Authors
 -------
 'git-sequencer-status' is maintained by:

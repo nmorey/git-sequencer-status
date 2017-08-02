@@ -2,40 +2,92 @@
 
 export GIT_DIR=$(git rev-parse --git-dir)
 
+USE_COLOR=0
+if [ -t 1 ]; then
+	USE_COLOR=1
+fi
+
+usage()
+{
+	local errCode=$1
+	echo -e "Usage: $(basename $0) [OPTS]"
+	echo -e "\t--[no-]color     Force color to be enabled/disabled"
+	echo -e "\t-h,--help        Diplay usage"
+	exit $errCode
+}
+
+
+while [ $# -gt 0 ]; do
+	ARG=$1
+	shift
+	case "$ARG" in
+		--color)
+			USE_COLOR=1
+			;;
+		--no-color)
+			USE_COLOR=0
+			;;
+		-h|--help)
+			usage 0
+			;;
+		*)
+			echo "ERROR: Invalid option $ARG" >&2
+			usage 1
+			;;
+	esac
+done
+
+if [ $USE_COLOR -eq 1 ]; then
+	export YELLOW_NODIM='\033[00;33m'
+	export RED_NODIM='\033[00;31m'
+	export RED_DIM='\033[02;31m'
+	export CYAN_BOLD='\033[01;36m'
+	export WHITE='\033[00m'
+	export COLOR_OPT="--color"
+else
+	export COLOR_OPT="--no-color"
+fi
+
+__git_log()
+{
+	git --no-pager log $COLOR_OPT "$@"
+}
 __colorize_todo()
 {
-	awk  -vC0='\033[00;33m' -vC1='\033[00;31m' -vC2='\033[00m' '{printf( C0 "%-7s " C1 $2 " " C2, $1); for (i = 3; i <= NF; i++) { printf("%s ", $i);}; printf("\n");}'
+	awk  -vC0=$YELLOW_NODIM -vC1=$RED_NODIM -vC2=$WHITE \
+		 '{printf( C0 "%-7s " C1 $2 " " C2, $1); for (i = 3; i <= NF; i++) { printf("%s ", $i);}; printf("\n");}'
 }
 
 __git_log_todo()
 {
-	git --no-pager log --format='%C(yellow nodim)pick    %C(red nodim)%h %C(white)%s' $*
+	__git_log --format='%C(auto,yellow nodim)pick    %C(auto,red nodim)%h %C(auto,white)%s' $*
 }
 __colorize_current()
 {
-	awk  -vC0='\033[01;36m' -vC1='\033[00;31m' -vC2='\033[00m' '{printf( C0 "%-7s " C1 $2 " " C2, $1); for (i = 3; i <= NF; i++) { printf("%s ", $i);}; printf("\n");}'
+	awk  -vC0=$CYAN_BOLD -vC1=$RED_NODIM -vC2=$WHITE \
+		 '{printf( C0 "%-7s " C1 $2 " " C2, $1); for (i = 3; i <= NF; i++) { printf("%s ", $i);}; printf("\n");}'
 }
 __git_log_current_unmerged()
 {
-	git --no-pager log --format='%C(cyan bold)*pick   %C(red nodim)%h %C(white)%s'  $*
+	__git_log --format='%C(auto,cyan bold)*pick   %C(auto,red nodim)%h %C(auto,white)%s'  $*
 }
 __git_log_current()
 {
-	git --no-pager log --format='%C(cyan bold)pick    %C(red nodim)%h %C(white)%s' $*
+	__git_log --format='%C(auto,cyan bold)pick    %C(auto,red nodim)%h %C(auto,white)%s' $*
 }
 
 __colorize_done()
 {
-	awk  -vC0='\033[02;31m' -vC1='\033[00;31m' -vC2='\033[00m' '{printf( C0 "%-7s " C1 $2 " " C2, $1); for (i = 3; i <= NF; i++) { printf("%s ", $i);}; printf("\n");}'
+	awk  -vC0=$RED_DIM -vC1=$RED_NODIM -vC2=$WHITE '{printf( C0 "%-7s " C1 $2 " " C2, $1); for (i = 3; i <= NF; i++) { printf("%s ", $i);}; printf("\n");}'
 }
 __git_log_done()
 {
-	git --no-pager log --format='%C(red dim)done    %C(red nodim)%h %C(white)%s' $*
+	__git_log --format='%C(auto,red dim)done    %C(auto,red nodim)%h %C(auto,white)%s' $*
 }
 
 __git_log_onto()
 {
-	git --no-pager log -n 1 --format='%C(red dim)onto    %C(red nodim)%h %C(white)%s' $*
+	__git_log -n 1 --format='%C(auto,red dim)onto    %C(auto,red nodim)%h %C(auto,white)%s' $*
 
 }
 __has_unmerged()
@@ -101,7 +153,7 @@ __simple_action()
 	local COMMIT=$(cat ${GIT_DIR}/$HEADFILE)
 	shift 2
 	echo "# " $* " a single commit"
-	echo "*$ACTION $(git --no-pager log --format='%h %s' -n 1 $COMMIT)" | __colorize_current
+	echo "*$ACTION $(__git_log  --format='%h %s' -n 1 $COMMIT)" | __colorize_current
 	__git_log_onto ${BASE}
 }
 
