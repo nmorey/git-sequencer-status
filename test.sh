@@ -144,7 +144,7 @@ EOF
 
 diff  <(echo "$LOG")  <(echo "$REF_LOG")
 if [ $? -ne 0 ]; then
-	echo "Failure in AM mode" >&2
+	echo "Failure in interactive rebase with empty commit mode" >&2
 	exit 1
 fi
 git rebase --abort
