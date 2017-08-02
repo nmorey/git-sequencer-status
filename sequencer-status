@@ -74,12 +74,12 @@ __simple_sequence()
 	local N_LINES=$(wc -l ${GIT_DIR}/sequencer/todo | awk '{ print $1}')
 	echo "# " $*
 
-	head -n $(( $N_LINES - 1 )) ${GIT_DIR}/sequencer/todo | __sanitize_todo | __colorize_todo
+	tac ${GIT_DIR}/sequencer/todo | head -n $(( $N_LINES - 1 ))  | __sanitize_todo | __colorize_todo
 
 	if [ $(__has_unmerged) != "0" ]; then
-		(echo -n '*'; tail -n 1 ${GIT_DIR}/sequencer/todo) | __sanitize_todo | __colorize_current
+		(echo -n '*'; head -n 1 ${GIT_DIR}/sequencer/todo) | __sanitize_todo | __colorize_current
 	else
-		tail -n 1 ${GIT_DIR}/sequencer/todo | __sanitize_todo | __colorize_current
+		head -n 1 ${GIT_DIR}/sequencer/todo | __sanitize_todo | __colorize_current
 	fi
 
 	__git_log_done HEAD ^${BASE}

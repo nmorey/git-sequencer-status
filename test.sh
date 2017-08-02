@@ -53,8 +53,8 @@ git cherry-pick master~2 master master~1 > /dev/null 2>&1
 LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 REF_LOG=$(cat <<EOF | __sanitize_log
 #  Cherry picking
-pick    4e8ccfd Fourth commit 
-*pick   f6d35cc Third commit 
+pick    f6d35cc Third commit 
+*pick   4e8ccfd Fourth commit 
 done    ce86bf6 Second commit
 onto    d0d80f9 Alternate history
 EOF
@@ -73,8 +73,8 @@ git revert --no-edit  master master~2 master~1 > /dev/null 2>&1
 LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 REF_LOG=$(cat <<EOF | __sanitize_log
 #  Reverting
-revert  960d878 Second commit 
-*revert f6d35cc Third commit 
+revert  f6d35cc Third commit 
+*revert 960d878 Second commit 
 done    50dd0a7 Revert "Fourth commit"
 onto    4e8ccfd Fourth commit
 EOF
