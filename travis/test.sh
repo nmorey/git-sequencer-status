@@ -137,6 +137,24 @@ EOF
 		exit 1
 	fi
 
+	git add file
+	GIT_EDITOR=true git revert --continue
+	LOG=$($SEQDIR/sequencer-status | __sanitize_log)
+	REF_LOG=$(cat <<EOF | __sanitize_log
+#  Reverting
+*revert 382e384 Third commit 
+done    5f46594 Revert "Second commit"
+done    6ff346f Revert "Fourth commit"
+onto    6570375 Fourth commit
+EOF
+		   )
+
+	diff  <(echo "$LOG")  <(echo "$REF_LOG")
+	if [ $? -ne 0 ]; then
+		echo "Failure in revert mode" >&2
+		exit 1
+	fi
+
 	git revert --abort
 
 	echo "Checking single revert support"
