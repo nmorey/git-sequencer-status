@@ -1,4 +1,4 @@
-sequencer status is a Bash script to display the sequencer status.
+git sequencer status is a Bash script to display the sequencer status.
 
 Several git commands (rebase, cherry-pick, am, revert) use the git sequencer
  when a list actions needs to be executed.

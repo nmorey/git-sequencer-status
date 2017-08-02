@@ -1,2 +1,4 @@
 *~
 results/
+doc/*.xml
+doc/*.1
