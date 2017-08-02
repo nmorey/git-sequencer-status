@@ -1,5 +1,7 @@
 #!/bin/bash 
 
+export GIT_AUTHOR_EMAIL=noreply@github.com
+export GIT_AUTHOR_NAME=travis
 SEQDIR=$(readlink -f $(dirname $(dirname $0)))
 source $SEQDIR/travis/julog.sh
 
@@ -18,6 +20,8 @@ setup_repo(){
 	cd $TMPDIR || exit 1
 	set -e
 	git init
+	git config user.email noreply@github.com
+	git config user.name Travis
 	echo 1 > file
 	git add file
 	git commit -m "First commit"

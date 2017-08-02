@@ -1,0 +1,40 @@
+git-sequencer-status(1)
+=======================
+
+NAME
+----
+git-sequencer-status - Display the status of the git sequencer
+
+
+SYNOPSIS
+--------
+[verse]
+'git sequencer-status'
+
+DESCRIPTION
+-----------
+
+'git-sequencer-status' displays the status of the git sequencer during
+rebase, reverts, am and cherry-picks.
+
+When multiple actions are required, git keeps an internal state of what
+is done and what is left to do. git-sequencer-status will display this
+state in a human readable format.
+
+This is largely inspired by the way Magit prints its status screen.
+
+Authors
+-------
+'git-sequencer-status' is maintained by:
+
+ Nicolas Morey-Chaisemartin <nicolas@morey-chaisemartin.com>
+
+The code is freely available on
+https://github.com/nmorey/git-sequencer-status
+
+Reporting Bugs
+--------------
+
+Bug reports can be submitted to
+
+https://github.com/nmorey/git-sequencer-status
