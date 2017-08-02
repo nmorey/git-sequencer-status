@@ -67,6 +67,10 @@ __sanitize_todo()
 		echo "${ACTION} ${SHORT_SHA1} ${SUBJECT}"
 	done
 }
+
+#
+# Dump status for cherry-pick and revert series
+#
 __simple_sequence()
 {
 	local BASE=$(cat ${GIT_DIR}/sequencer/head)
@@ -83,6 +87,21 @@ __simple_sequence()
 	fi
 
 	__git_log_done HEAD ^${BASE}
+	__git_log_onto ${BASE}
+}
+
+#
+# Status for a single cherry-pick or revert
+#
+__simple_action()
+{
+	local HEADFILE=$1
+	local ACTION=$2
+	local BASE=$(git rev-parse HEAD)
+	local COMMIT=$(cat ${GIT_DIR}/$HEADFILE)
+	shift 2
+	echo "# " $* " a single commit"
+	echo "*$ACTION $(git --no-pager log --format='%h %s' -n 1 $COMMIT)" | __colorize_current
 	__git_log_onto ${BASE}
 }
 
@@ -195,7 +214,11 @@ fi
 if [ -d ${GIT_DIR}/rebase-merge ]; then
 	__rebase_merge_sequence
 elif [ -f ${GIT_DIR}/CHERRY_PICK_HEAD ]; then
-	__simple_sequence "Cherry picking"
+	if [ -d ${GIT_DIR}/sequencer ]; then
+		__simple_sequence "Cherry picking"
+	else
+		__simple_action CHERRY_PICK_HEAD pick "Cherry picking"
+	fi
 elif  [ -d ${GIT_DIR}/rebase-apply ]; then
 	if [ -f ${GIT_DIR}/rebase-apply/applying ]; then
 		__am_apply_sequence
@@ -203,5 +226,9 @@ elif  [ -d ${GIT_DIR}/rebase-apply ]; then
 		__rebase_apply_sequence
 	fi
 elif [ -f ${GIT_DIR}/REVERT_HEAD ]; then
-	__simple_sequence "Reverting"
+	if [ -d ${GIT_DIR}/sequencer ]; then
+		__simple_sequence "Reverting"
+	else
+		__simple_action REVERT_HEAD revert "Reverting"
+	fi
 fi) | ${PAGER}

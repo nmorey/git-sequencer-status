@@ -67,6 +67,25 @@ if [ $? -ne 0 ]; then
 fi
 git cherry-pick --abort
 
+echo "Checking single cherry pick support"
+git checkout cherry_pick
+git cherry-pick HEAD > /dev/null 2>&1
+LOG=$($SEQDIR/sequencer-status | __sanitize_log)
+REF_LOG=$(cat <<EOF | __sanitize_log
+#  Cherry picking  a single commit
+*pick   148d9a1 Alternate history 
+onto    148d9a1 Alternate history
+EOF
+)
+
+diff  <(echo "$LOG")  <(echo "$REF_LOG")
+if [ $? -ne 0 ]; then
+	echo "Failure in single cherry pick mode" >&2
+	exit 1
+fi
+git cherry-pick --abort
+
+
 echo "Checking revert support"
 git checkout revert
 git revert --no-edit  master master~2 master~1 > /dev/null 2>&1
@@ -83,6 +102,25 @@ EOF
 diff  <(echo "$LOG")  <(echo "$REF_LOG")
 if [ $? -ne 0 ]; then
 	echo "Failure in revert mode" >&2
+	exit 1
+fi
+
+git revert --abort
+
+echo "Checking single revert support"
+git checkout revert
+git revert --no-edit  HEAD~1 > /dev/null 2>&1
+LOG=$($SEQDIR/sequencer-status | __sanitize_log)
+REF_LOG=$(cat <<EOF | __sanitize_log
+#  Reverting  a single commit
+*revert 382e384 Third commit 
+onto    6570375 Fourth commit
+EOF
+)
+
+diff  <(echo "$LOG")  <(echo "$REF_LOG")
+if [ $? -ne 0 ]; then
+	echo "Failure in single revert mode" >&2
 	exit 1
 fi
 
