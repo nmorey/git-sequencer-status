@@ -11,7 +11,7 @@ export TMPDIR=$(mktemp -d)
 # Drop colors and SHA as they change from one run to another
 __sanitize_log()
 {
-	sed -r -e "s/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[mGK]//g" -e 's/^([a-zA-Z\*]* +)[a-f0-9]+ /\1 /g'
+	sed -r  -e 's/^([a-zA-Z\*]* +)[a-f0-9]+ /\1 /g'
 }
 
 echo $TMPDIR
