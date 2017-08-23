@@ -58,10 +58,25 @@ __git_log()
 {
 	git --no-pager log $COLOR_OPT "$@"
 }
+___colorize()
+{
+	local C0=$1
+	local C1=$2
+	local C2=$3
+
+	awk  -vC0=$C0 -vC1=$C1 -vC2=$C2 \
+		 '
+{
+	 printf( C0 "%-7s " C1 $2 " " C2, $1);
+	 for (i = 3; i <= NF; i++) {
+	 	 printf("%s ", $i);
+	 };
+	 printf("\n");
+}'
+}
 __colorize_todo()
 {
-	awk  -vC0=$YELLOW_NODIM -vC1=$RED_NODIM -vC2=$WHITE \
-		 '{printf( C0 "%-7s " C1 $2 " " C2, $1); for (i = 3; i <= NF; i++) { printf("%s ", $i);}; printf("\n");}'
+	___colorize $YELLOW_NODIM $RED_NODIM $WHITE
 }
 
 __git_log_todo()
@@ -70,8 +85,7 @@ __git_log_todo()
 }
 __colorize_current()
 {
-	awk  -vC0=$CYAN_BOLD -vC1=$RED_NODIM -vC2=$WHITE \
-		 '{printf( C0 "%-7s " C1 $2 " " C2, $1); for (i = 3; i <= NF; i++) { printf("%s ", $i);}; printf("\n");}'
+	___colorize $CYAN_BOLD $RED_NODIM $WHITE
 }
 __git_log_current_unmerged()
 {
@@ -84,7 +98,7 @@ __git_log_current()
 
 __colorize_done()
 {
-	awk  -vC0=$RED_DIM -vC1=$RED_NODIM -vC2=$WHITE '{printf( C0 "%-7s " C1 $2 " " C2, $1); for (i = 3; i <= NF; i++) { printf("%s ", $i);}; printf("\n");}'
+	___colorize $RED_DIM $RED_NODIM $WHITE
 }
 __git_log_done()
 {
