@@ -128,7 +128,7 @@ __sha1_to_refname()
 	git name-rev --name-only --no-undefined ${ONTO} --refs refs/heads/*
 }
 
-__sanitize_todo()
+__sanitize()
 {
 	while read line; do
 		ACTION=$(echo "$line" | awk '{ print $1}')
@@ -150,12 +150,12 @@ __simple_sequence()
 	local N_LINES=$(wc -l ${GIT_DIR}/sequencer/todo | awk '{ print $1}')
 	echo "# " $*
 
-	tac ${GIT_DIR}/sequencer/todo | head -n $(( $N_LINES - 1 ))  | __sanitize_todo | __colorize_todo
+	tac ${GIT_DIR}/sequencer/todo | head -n $(( $N_LINES - 1 ))  | __sanitize | __colorize_todo
 
 	if [ $(__has_unmerged) != "0" ]; then
-		(echo -n '*'; head -n 1 ${GIT_DIR}/sequencer/todo) | __sanitize_todo | __colorize_current
+		(echo -n '*'; head -n 1 ${GIT_DIR}/sequencer/todo) | __sanitize | __colorize_current
 	else
-		head -n 1 ${GIT_DIR}/sequencer/todo | __sanitize_todo | __colorize_current
+		head -n 1 ${GIT_DIR}/sequencer/todo | __sanitize | __colorize_current
 	fi
 
 	__git_log_done HEAD ^${BASE}
@@ -187,15 +187,15 @@ __rebase_merge_sequence()
 
 	echo "# Interactive rebase: ${BASE_NICE} onto ${ONTO_NICE}"
 	tac ${GIT_DIR}/rebase-merge/git-rebase-todo | egrep -v '^#' | \
-		egrep -v '^$' | __sanitize_todo |__colorize_todo
+		egrep -v '^$' | __sanitize |__colorize_todo
 
 	if [ $(__has_unmerged) != "0" ]; then
-		echo "*$CURRENT" |  __sanitize_todo | __colorize_current
+		echo "*$CURRENT" |  __sanitize | __colorize_current
 	else
-		echo "$CURRENT" | __sanitize_todo |  __colorize_current
+		echo "$CURRENT" | __sanitize |  __colorize_current
 	fi
 
-	tac ${GIT_DIR}/rebase-merge/done | tail -n +2 | __sanitize_todo | __colorize_done
+	tac ${GIT_DIR}/rebase-merge/done | tail -n +2 | __sanitize | __colorize_done
 	__git_log_onto ${ONTO}
 }
 
