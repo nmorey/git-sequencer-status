@@ -18,7 +18,7 @@
 %define git_ver %{nil}
 
 Name:           git-sequencer-status
-Version:        1.1
+Version:        1.2
 Release:        0
 Summary:        Git sequencer status is a Bash script to display the sequencer status
 License:        GPL-3.0

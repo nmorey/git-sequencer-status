@@ -1,4 +1,11 @@
 -------------------------------------------------------------------
+Wed Aug 23 08:03:01 UTC 2017 - nmoreychaisemartin@suse.com
+
+- Version 1.2
+  * Factor coloring code
+  * Add support for "exec" todo in rebase
+
+-------------------------------------------------------------------
 Wed Aug  2 14:10:32 UTC 2017 - nmoreychaisemartin@suse.com
 
 - Version 1.1
