@@ -236,12 +236,15 @@ test_rebase_interative()
 	goto_repo
 	echo "Checking rebase with conflict support"
 	git checkout master
-	GIT_EDITOR=true git rebase -i rebase_conflict      > /dev/null 2>&1
+	GIT_EDITOR=true git rebase -i rebase_conflict -x true > /dev/null 2>&1
 	LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 	REF_LOG=$(cat <<EOF | __sanitize_log
 # Interactive rebase: master onto rebase_conflict
+exec    true 
 pick    6570375 Fourth commit 
+exec    true 
 pick    382e384 Third commit 
+exec    true 
 *pick   5e8c91b Second commit 
 onto    5c32ab9 Alternate second
 EOF
@@ -256,12 +259,15 @@ EOF
 
 	echo "Checking rebase with empty commit support"
 	git checkout master
-	GIT_EDITOR=true git rebase -i empty_cp  > /dev/null 2>&1
+	GIT_EDITOR=true git rebase -i empty_cp -x "echo OK" > /dev/null 2>&1
 	LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 	REF_LOG=$(cat <<EOF | __sanitize_log
 # Interactive rebase: master onto empty_cp
+exec    echo OK 
 pick    d4e101f Fourth commit 
+exec    echo OK 
 pick    b636e21 Third commit 
+exec    echo OK 
 pick    f4f895f Second commit 
 onto    211640b Redundant second commit
 EOF
