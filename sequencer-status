@@ -58,22 +58,32 @@ __git_log()
 {
 	git --no-pager log $COLOR_OPT "$@"
 }
+
 ___colorize()
 {
-	local C0=$1
-	local C1=$2
-	local C2=$3
+   local C0=$1
+   local C1=$2
+   local C2=$3
 
-	awk  -vC0=$C0 -vC1=$C1 -vC2=$C2 \
-		 '
+   awk  -vC0=$C0 -vC1=$C1 -vC2=$C2 \
+        '
 {
-	 printf( C0 "%-7s " C1 $2 " " C2, $1);
-	 for (i = 3; i <= NF; i++) {
-	 	 printf("%s ", $i);
-	 };
-	 printf("\n");
+    if ($1 == "exec") {
+        printf( C0 "%-7s " C2, $1);
+        for (i = 2; i <= NF; i++) {
+            printf("%s ", $i);
+        };
+        printf("\n");
+    } else {
+        printf( C0 "%-7s " C1 $2 " " C2, $1);
+        for (i = 3; i <= NF; i++) {
+            printf("%s ", $i);
+        };
+        printf("\n");
+    }
 }'
 }
+
 __colorize_todo()
 {
 	___colorize $YELLOW_NODIM $RED_NODIM $WHITE
@@ -132,13 +142,17 @@ __sanitize()
 {
 	while read line; do
 		ACTION=$(echo "$line" | awk '{ print $1}')
-		SHA1=$(echo "$line" | awk '{ print $2}')
-		SUBJECT=$(echo "$line" | awk '{ for (i = 3; i <= NF; i++) { printf("%s ", $i);}; printf("\n");}')
-
-		SHORT_SHA1=$(git log -n 1 ${SHA1} --format='%h')
-		echo "${ACTION} ${SHORT_SHA1} ${SUBJECT}"
+		if [ "$ACTION" != "exec" ]; then
+			SHA1=$(echo "$line" | awk '{ print $2}')
+			SHORT_SHA1=$(git log -n 1 ${SHA1} --format='%h')
+			SUBJECT=$(echo "$line" | awk '{ for (i = 3; i <= NF; i++) { printf("%s ", $i);}; printf("\n");}')
+			echo "${ACTION} ${SHORT_SHA1} ${SUBJECT}"
+		else
+			echo $line
+		fi
 	done
 }
+
 
 #
 # Dump status for cherry-pick and revert series
