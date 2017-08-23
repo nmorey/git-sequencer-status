@@ -92,13 +92,13 @@ done    81da2ea Second commit
 onto    148d9a1 Alternate history
 EOF
 		   )
+	git cherry-pick --abort
 
 	diff  <(echo "$LOG")  <(echo "$REF_LOG")
 	if [ $? -ne 0 ]; then
 		echo "Failure in cherry pick mode" >&2
 		exit 1
 	fi
-	git cherry-pick --abort
 
 	echo "Checking single cherry pick support"
 	git checkout cherry_pick
@@ -110,13 +110,14 @@ EOF
 onto    148d9a1 Alternate history
 EOF
 		   )
+	git cherry-pick --abort
 
 	diff  <(echo "$LOG")  <(echo "$REF_LOG")
 	if [ $? -ne 0 ]; then
 		echo "Failure in single cherry pick mode" >&2
 		exit 1
 	fi
-	git cherry-pick --abort
+
 }
 
 test_revert()
@@ -137,6 +138,7 @@ EOF
 
 	diff  <(echo "$LOG")  <(echo "$REF_LOG")
 	if [ $? -ne 0 ]; then
+		git revert --abort
 		echo "Failure in revert mode" >&2
 		exit 1
 	fi
@@ -152,6 +154,7 @@ done    6ff346f Revert "Fourth commit"
 onto    6570375 Fourth commit
 EOF
 		   )
+	git revert --abort
 
 	diff  <(echo "$LOG")  <(echo "$REF_LOG")
 	if [ $? -ne 0 ]; then
@@ -159,7 +162,6 @@ EOF
 		exit 1
 	fi
 
-	git revert --abort
 
 	echo "Checking single revert support"
 	git checkout revert
@@ -171,6 +173,7 @@ EOF
 onto    6570375 Fourth commit
 EOF
 		   )
+	git revert --abort
 
 	diff  <(echo "$LOG")  <(echo "$REF_LOG")
 	if [ $? -ne 0 ]; then
@@ -178,7 +181,6 @@ EOF
 		exit 1
 	fi
 
-	git revert --abort
 }
 
 test_rebase()
@@ -196,13 +198,13 @@ pick    46c2f5e Third commit
 onto    68cb488 Alternate second
 EOF
 		   )
+	git rebase --abort
 
 	diff  <(echo "$LOG")  <(echo "$REF_LOG")
 	if [ $? -ne 0 ]; then
 		echo "Failure in revert mode" >&2
 		exit 1
 	fi
-	git rebase --abort
 }
 
 test_am()
@@ -220,13 +222,13 @@ done    0001 Third commit
 onto    339d1b1 Alternate second
 EOF
 		   )
+	git am --abort
 
 	diff  <(echo "$LOG")  <(echo "$REF_LOG")
 	if [ $? -ne 0 ]; then
 		echo "Failure in AM mode" >&2
 		exit 1
 	fi
-	git am --abort
 }
 
 test_rebase_interative()
@@ -234,7 +236,7 @@ test_rebase_interative()
 	goto_repo
 	echo "Checking rebase with conflict support"
 	git checkout master
-	GIT_EDITOR=true git rebase -i rebase_conflict  > /dev/null 2>&1
+	GIT_EDITOR=true git rebase -i rebase_conflict      > /dev/null 2>&1
 	LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 	REF_LOG=$(cat <<EOF | __sanitize_log
 # Interactive rebase: master onto rebase_conflict
@@ -244,13 +246,13 @@ pick    382e384 Third commit
 onto    5c32ab9 Alternate second
 EOF
 		   )
+	git rebase --abort
 
 	diff  <(echo "$LOG")  <(echo "$REF_LOG")
 	if [ $? -ne 0 ]; then
 		echo "Failure in interactive rebase with conflict mode" >&2
 		exit 1
 	fi
-	git rebase --abort
 
 	echo "Checking rebase with empty commit support"
 	git checkout master
@@ -264,13 +266,13 @@ pick    f4f895f Second commit
 onto    211640b Redundant second commit
 EOF
 		   )
+	git rebase --abort
 
 	diff  <(echo "$LOG")  <(echo "$REF_LOG")
 	if [ $? -ne 0 ]; then
 		echo "Failure in interactive rebase with empty commit mode" >&2
 		exit 1
 	fi
-	git rebase --abort
 }
 
 
@@ -289,13 +291,13 @@ pick    46c2f5e Third commit
 onto    68cb488 Alternate second
 EOF
 		   )
+	git rebase --abort
 
 	diff  <(echo "$LOG")  <(echo "$REF_LOG")
 	if [ $? -eq 0 ]; then
 		echo "Failure in color mode" >&2
 		exit 1
 	fi
-	git rebase --abort
 }
 
 juLog_fatal setup_repo
@@ -309,6 +311,8 @@ juLog test_color
 
 
 # Post cleanup
-rm -Rf $TMPDIR
+if [ $errors -eq 0 ]; then
+	rm -Rf $TMPDIR
+fi
 
 exit $errors
