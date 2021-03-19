@@ -191,7 +191,7 @@ test_rebase()
 	git rebase rebase_conflict > /dev/null 2>&1
 	LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 	REF_LOG=$(cat <<EOF | __sanitize_log
-# Non-interactive rebase: revert onto rebase_conflict
+# Rebase: revert onto rebase_conflict
 pick    38fb428 Fourth commit
 pick    46c2f5e Third commit
 *pick   22bc518 Second commit
@@ -239,7 +239,7 @@ test_rebase_interative()
 	GIT_EDITOR=true git rebase -i rebase_conflict -x true > /dev/null 2>&1
 	LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 	REF_LOG=$(cat <<EOF | __sanitize_log
-# Interactive rebase: master onto rebase_conflict
+# Rebase: master onto rebase_conflict
 exec    true
 pick    6570375 Fourth commit
 exec    true
@@ -262,7 +262,7 @@ EOF
 	GIT_EDITOR=true git rebase -i empty_cp -x "echo OK" > /dev/null 2>&1
 	LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 	REF_LOG=$(cat <<EOF | __sanitize_log
-# Interactive rebase: master onto empty_cp
+# Rebase: master onto empty_cp
 exec    echo OK
 pick    d4e101f Fourth commit
 exec    echo OK
@@ -290,7 +290,7 @@ test_color()
 	git rebase rebase_conflict > /dev/null 2>&1
 	LOG=$($SEQDIR/sequencer-status --color | __sanitize_log)
 	REF_LOG=$(cat <<EOF | __sanitize_log
-# Non-interactive rebase: revert onto rebase_conflict
+# Rebase: revert onto rebase_conflict
 pick    38fb428 Fourth commit
 pick    46c2f5e Third commit
 *pick   22bc518 Second commit

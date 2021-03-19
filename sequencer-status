@@ -199,7 +199,7 @@ __rebase_merge_sequence()
 	local ONTO_NICE=$(__sha1_to_refname ${ONTO} ${BASE})
 	local CURRENT=$(tail -n 1 ${GIT_DIR}/rebase-merge/done)
 
-	echo "# Interactive rebase: ${BASE_NICE} onto ${ONTO_NICE}"
+	echo "# Rebase: ${BASE_NICE} onto ${ONTO_NICE}"
 	tac ${GIT_DIR}/rebase-merge/git-rebase-todo | egrep -v '^#' | \
 		egrep -v '^$' | __sanitize |__colorize_todo
 
@@ -222,7 +222,7 @@ __rebase_apply_sequence()
 	local UNAPPLIED=1
 	local NEXT=$(cat ${GIT_DIR}/rebase-apply/next)
 
-	echo "# Non-interactive rebase: ${BASE_NICE} onto ${ONTO_NICE}"
+	echo "# Rebase: ${BASE_NICE} onto ${ONTO_NICE}"
 
 	for FILE in $(ls -r ${GIT_DIR}/rebase-apply/[0-9]*); do
 		local NUM=$(basename $FILE | sed -e 's/^0*//')
