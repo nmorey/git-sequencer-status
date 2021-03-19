@@ -68,8 +68,8 @@ test_cherry_pick()
 	LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 	REF_LOG=$(cat <<EOF | __sanitize_log
 #  Cherry picking
-pick    f6d35cc Third commit 
-*pick   4e8ccfd Fourth commit 
+pick    f6d35cc Third commit
+*pick   4e8ccfd Fourth commit
 done    ce86bf6 Second commit
 onto    d0d80f9 Alternate history
 EOF
@@ -86,7 +86,7 @@ EOF
 	LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 	REF_LOG=$(cat <<EOF | __sanitize_log
 #  Cherry picking
-*pick   382e384 Third commit 
+*pick   382e384 Third commit
 done    85fbb5f Fourth commit
 done    81da2ea Second commit
 onto    148d9a1 Alternate history
@@ -106,7 +106,7 @@ EOF
 	LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 	REF_LOG=$(cat <<EOF | __sanitize_log
 #  Cherry picking  a single commit
-*pick   148d9a1 Alternate history 
+*pick   148d9a1 Alternate history
 onto    148d9a1 Alternate history
 EOF
 		   )
@@ -129,8 +129,8 @@ test_revert()
 	LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 	REF_LOG=$(cat <<EOF | __sanitize_log
 #  Reverting
-revert  f6d35cc Third commit 
-*revert 960d878 Second commit 
+revert  f6d35cc Third commit
+*revert 960d878 Second commit
 done    50dd0a7 Revert "Fourth commit"
 onto    4e8ccfd Fourth commit
 EOF
@@ -148,7 +148,7 @@ EOF
 	LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 	REF_LOG=$(cat <<EOF | __sanitize_log
 #  Reverting
-*revert 382e384 Third commit 
+*revert 382e384 Third commit
 done    5f46594 Revert "Second commit"
 done    6ff346f Revert "Fourth commit"
 onto    6570375 Fourth commit
@@ -169,7 +169,7 @@ EOF
 	LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 	REF_LOG=$(cat <<EOF | __sanitize_log
 #  Reverting  a single commit
-*revert 382e384 Third commit 
+*revert 382e384 Third commit
 onto    6570375 Fourth commit
 EOF
 		   )
@@ -217,8 +217,8 @@ test_am()
 	LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 	REF_LOG=$(cat <<EOF | __sanitize_log
 # Applying patches
-pick    0002 Fourth commit 
-done    0001 Third commit 
+pick    0002 Fourth commit
+done    0001 Third commit
 onto    339d1b1 Alternate second
 EOF
 		   )
@@ -240,12 +240,12 @@ test_rebase_interative()
 	LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 	REF_LOG=$(cat <<EOF | __sanitize_log
 # Interactive rebase: master onto rebase_conflict
-exec    true 
-pick    6570375 Fourth commit 
-exec    true 
-pick    382e384 Third commit 
-exec    true 
-*pick   5e8c91b Second commit 
+exec    true
+pick    6570375 Fourth commit
+exec    true
+pick    382e384 Third commit
+exec    true
+*pick   5e8c91b Second commit
 onto    5c32ab9 Alternate second
 EOF
 		   )
@@ -263,12 +263,12 @@ EOF
 	LOG=$($SEQDIR/sequencer-status | __sanitize_log)
 	REF_LOG=$(cat <<EOF | __sanitize_log
 # Interactive rebase: master onto empty_cp
-exec    echo OK 
-pick    d4e101f Fourth commit 
-exec    echo OK 
-pick    b636e21 Third commit 
-exec    echo OK 
-pick    f4f895f Second commit 
+exec    echo OK
+pick    d4e101f Fourth commit
+exec    echo OK
+pick    b636e21 Third commit
+exec    echo OK
+pick    f4f895f Second commit
 onto    211640b Redundant second commit
 EOF
 		   )

@@ -70,16 +70,16 @@ ___colorize()
 {
     if ($1 == "exec") {
         printf( C0 "%-7s " C2, $1);
-        for (i = 2; i <= NF; i++) {
+        for (i = 2; i < NF; i++) {
             printf("%s ", $i);
         };
-        printf("\n");
+        printf("%s\n", $NF);
     } else {
         printf( C0 "%-7s " C1 $2 " " C2, $1);
-        for (i = 3; i <= NF; i++) {
+        for (i = 3; i < NF; i++) {
             printf("%s ", $i);
         };
-        printf("\n");
+        printf("%s\n", $NF);
     }
 }'
 }
