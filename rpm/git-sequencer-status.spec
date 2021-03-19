@@ -1,7 +1,7 @@
 #
-# spec file for package par2cmdline
+# spec file for package git-sequencer-status
 #
-# Copyright (c) 2017 SUSE LINUX GmbH, Nuernberg, Germany.
+# Copyright (c) 2021 SUSE LLC
 #
 # All modifications and additions to the file contributed by third parties
 # remain the property of their copyright owners, unless otherwise agreed
@@ -12,7 +12,7 @@
 # license that conforms to the Open Source Definition (Version 1.9)
 # published by the Open Source Initiative.
 
-# Please submit bugfixes or comments via http://bugs.opensuse.org/
+# Please submit bugfixes or comments via https://bugs.opensuse.org/
 #
 
 %define git_ver %{nil}
@@ -21,13 +21,13 @@ Name:           git-sequencer-status
 Version:        1.2
 Release:        0
 Summary:        Git sequencer status is a Bash script to display the sequencer status
-License:        GPL-3.0
+License:        GPL-3.0-only
 Group:          Development/Tools/Version
-Url:            https://github.com/nmorey/git-sequencer-status
+URL:            https://github.com/nmorey/git-sequencer-status
 Source:         %{name}-%{version}%{git_ver}.tar.bz2
-BuildRequires:  git-core >= 2.0
-BuildRequires:  bc
 BuildRequires:  asciidoc
+BuildRequires:  bc
+BuildRequires:  git-core >= 2.0
 BuildRequires:  xmlto
 Requires:       git-core >= 2.0
 BuildArch:      noarch
