@@ -200,8 +200,8 @@ __rebase_merge_sequence()
 	local CURRENT=$(tail -n 1 ${GIT_DIR}/rebase-merge/done)
 
 	echo "# Rebase: ${BASE_NICE} onto ${ONTO_NICE}"
-	tac ${GIT_DIR}/rebase-merge/git-rebase-todo | egrep -v '^#' | \
-		egrep -v '^$' | __sanitize |__colorize_todo
+	tac ${GIT_DIR}/rebase-merge/git-rebase-todo | grep -E -v '^#' | \
+		grep -E -v '^$' | __sanitize |__colorize_todo
 
 	if [ $(__has_unmerged) != "0" ]; then
 		echo "*$CURRENT" |  __sanitize | __colorize_current
@@ -254,7 +254,7 @@ __am_apply_sequence()
 	for FILE in $(ls -r ${GIT_DIR}/rebase-apply/[0-9]*); do
 		local PATCH_ID=$(basename $FILE)
 		local NUM=$(echo $PATCH_ID | sed -e 's/^0*//')
-		local SUBJECT=$(egrep '^Subject:' $FILE | head -n 1 |\
+		local SUBJECT=$(grep -E '^Subject:' $FILE | head -n 1 |\
 					sed -e 's/Subject:[[:space:]]*\(\[[^]]*\][[:space:]]*\)*//')
 
 		if [ "$NUM"  == "$NEXT" ]; then

@@ -89,7 +89,7 @@ juLog() {
   [ $evErr != 0 ] && err=1 || err=0
   out=`cat $outf | sed -e 's/^\([^+]\)/| \1/g'`
   if [ $err = 0 -a -n "$ereg" ]; then
-      H=`echo "$out" | egrep $icase "$ereg"`
+      H=`echo "$out" | grep -E $icase "$ereg"`
       [ -n "$H" ] && err=1
   fi
   echo "+++ error: $err"         | tee -a $outf
