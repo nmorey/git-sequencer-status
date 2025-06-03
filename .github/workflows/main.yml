@@ -1,0 +1,39 @@
+name: Validation
+
+on:
+  push:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+      checks: write
+      pull-requests: write
+    steps:
+     - uses: actions/checkout@v4
+       with:
+         fetch-tags: 1
+         fetch-depth: 0
+     - name: Install dependencies
+       run: |
+         sudo apt-get update
+         sudo apt-get install -y bc git
+     - name: Validate sequencer-status
+       run: |
+          ./travis/test.sh
+     - name: Publish Test Report
+       uses: mikepenz/action-junit-report@v5
+       if: success() || failure() # always run even if the previous step fails
+       with:
+         report_paths: 'results/TEST-*.xml'
+         include_passed: true
+         require_tests: true
+         require_passed_tests: true
+         fail_on_parse_error: true
+         fail_on_failure: true
